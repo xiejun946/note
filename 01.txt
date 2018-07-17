@@ -1,0 +1,178 @@
+企业一般双yum源，
+1 物理机                      虚拟机
+ 禁用selinux
+ /etc/selinux.conf
+ disabled
+ firewalld
+ systemctl stop firewalld
+ systemctl mask firewalld(删除快捷方式进/dev/null)
+ 重启生效
+------------------------------------------------
+ 网络yum源
+ 1安装vsftpd
+ vim /etc/vsftpd/vsftpd.conf
+ listen=YES
+ listem_IPV6=no
+ systemctl restart vsftpd
+ 默认目录/var/ftp
+ lftp命令
+ yum -y install lftp
+ lftp 192.168.1.10 -u 用户名 默认连接ftp服务（ftp21端口未开的时候）
+ lftp sftp://192.168.4.254 -u 用户名  默认连接ssh服务
+ mount iso 
+ mount -t iso9660 -o ro,loop /var/iso/Centos7-1708.iso /var/ftp/Centos7
+ 自定义yum源
+ mkdir -p /var/ftp/public
+ cp xx.rpm  /var/ftp/public
+ cd /var/ftp/public
+ createrepo .       创新仓库(注意有点，代表当前目录)
+ createrepo --update  .        更新仓库
+  客户端配置
+  /etc/yum.repos.d/ooxx.repo
+[local_centos]
+name=CentOS 7 Source
+baseurl=ftp://ip.xx.xx.xx/CentOS7
+enabled=1
+gpgcheck=0
+
+[local_soft]
+name=local soft
+baseurl=ftp://ip.xx.xx.xx/public
+enabled=1
+gpgcheck=0
+----------------------------------------物理机
+ dns转发安装配置
+yum install -y bind-chroot
+配置文件 /etc/named.conf
+listen-on port 53 { 192.168.4.254; };（不能填127.0.0.1）
+//listen-on-v6 port 53 { ::1; };
+allow-query     { any; };
+forwarders { 114.114.114.114; };
+dnssec-enable no;
+dnssec-validation no;
+客户端
+vim /etc/resov.conf
+nameserver 192.168.4.254(和上面对应)
+ 时间服务器
+ yum install -y chrony 
+server:配置 /etc/chrony.conf
+server ntp1.aliyun.com iburst
+bindacqaddress 0.0.0.0
+allow 0/0
+
+client:配置 /etc/chrony.conf
+server server.ip.xx.xx iburst
+
+检查状态
+chronyc sources -v
+
+
+KVM虚拟化由3部分组成
+KVM /QEMU /LIBVIRTD
+知
+识
+讲
+解
+– KVM是linux内核的模块,它需要CPU的支持,采用硬
+    件辅劣虚拟化技术 Intel-VT,AMD-V,内存的相关如
+    Intel的 EPT 和 AMD 的 RVI 技术
+– QEMU 是一个虚拟化的仿真工具,通过 ioctl 不内核
+    kvm 交互完成对硬件的虚拟化支持
+– Libvirt 是一个对虚拟化管理的接口和工具,提供用户
+    端程序 virsh ,virt-install, virt-manager, virt-view 不
+    用户交互
+  
+知
+识
+讲
+解
+  qemu-kvm
+– 为 kvm 提供底层仿真支持
+  libvirt-daemon
+– libvirtd 守护进程,管理虚拟机
+  libvirt-client
+– 用户端软件,提供客户端管理命令
+  libvirt-daemon-driver-qemu
+– libvirtd 连接 qemu 的驱劢
+ yum -y install qemu-kvm libvirt-daemon libvirt-client libvirt-daemon-driver-qemu
+  systemctl start libvirtd 重启服务即可
+
+  查看KVM节点(服务器)信息
+– virsh nodeinfo
+  virsh list --all
+  virsh net-list 列出虚拟网络
+  virsh start 虚拟机名
+  virsh shutdown 虚拟机名
+  virsh dominfo 虚拟机名称
+  
+
+
+切换系统中英文翻译
+LANG=en_US.UTF-8
+LANG=zh_CN.UTF-8
+
+
+  创建新的镜像盘文件
+qemu-img create -f 格式 磁盘路径 大小
+-b 使用后端模板文件
+– qemu-img create -b disk.img -f qcow2 disk1.img
+
+virsh控制台内
+qemu+ssh://user@ip.xx.xx.xx:port/system
+
+
+
+
+创建虚拟交换机
+• libvirtd 网络接口
+– 原理:调用 dnsmasq 提供DNS、DHCP等功能
+知
+识
+讲
+解
+
+– 创建配置文件 /etc/libvirt/qemu/networks/vbr.xml
+<network>
+<name>vbr</name>
+<bridge name="vbr"/>
+<forward mode="nat"/>
+<ip address="192.168.1.254" netmask="255.255.255.0">
+<dhcp>
+<range start="192.168.1.100" end="192.168.1.200"/>
+</dhcp>
+</ip>
+</network>
+
+virsh 管理虚拟网络
+– net-list 查看虚拟网络
+知
+识
+讲
+解
+– net-define vbr.xml 创建虚拟网络
+– net-undefine vbr 删除虚拟网络
+– net-start vbr 启劢虚拟网络
+– net-destroy vbr 停止虚拟网络
+– net-edit vbr 修改 vbr 网络的配置
+– net-autostart vbr 设置 vbr 虚拟网络开机自启劢
+
+导出虚拟机
+• xml配置文件
+知
+识
+讲
+解
+– 定义了一个虚拟机的名称、CPU、内存、虚拟磁盘、
+网卡等各种参数设置
+– 默认位于 /etc/libvirt/qemu/虚拟机名.xml
+• 导出xml配置文件
+– 查看:virsh dumpxml 虚拟机名
+– 备份:virsh dumpxml 虚拟机名 > 虚拟机名.xml
+
+
+
+virsh define XML描述文件
+
+ 
+ 
+ shell 命令exec 重定向
