@@ -1,0 +1,74 @@
+yum provides ifconfig
+yum provides vim
+需要软件包查询安装即可
+
+快速创建虚拟机
+virsh undefine 虚拟机名 （删除虚拟机）
+创建前端盘
+cd  /var/lib/libvirt/images/
+qemu-img create -f qcow2 -b node.qcow2 node1.img 30G  按照后端盘生成前端盘
+创建 xml 配置文件
+sed 's,demo,node1,' demo.xml >/etc/libvirt/qemu/node1.xml 定义xml文件
+定义虚拟机
+virsh define /etc/libvirt/qemu/node1.xml 创建虚拟机
+virsh start node1 开启虚拟机
+
+
+
+内存及硬盘休眠相关设置,可以清除
+<pm> ... ... </pm>
+memory unit 虚拟机最大使用内存,可以手劢调整
+– currentmemory 创建虚拟机使用内存
+总线地址,别名配置,都可以初除
+知
+识
+讲
+解
+<address ....
+<alias ...
+
+type='mouse' 鼠标,保留
+知
+识
+讲
+解
+– type='keyboard' 键盘保留
+– graphics、video 图形图像显卡相关配置,可以初除
+– sound 声卡相关配置,可以初除
+– redirdev 设备重定向,可以初除
+– memballoon 内存气泡,可以劢态调整内存
+type='pci' pci总线设备,可初除
+知
+识
+讲
+解
+– type='virtio-serial' 串口设备需要保留串口终端
+– type='network' 网络配置需要修改
+– type='pty' 串口终端,需要保留
+– type='unix' 虚拟机通讯控制接口
+– type='spicevmc' 图形图像相关配置可以初除
+– type='tablet' 数位板,可以初除
+
+
+
+如何挂载虚拟盘
+• 基本用法
+guestmount -a 虚拟机磁盘路径 -i /挂载点
+知
+识
+讲
+解
+[root@kvmsvr ~]# mkdir /mnt/kdisk
+[root@kvmsvr ~]# guestmount -a node1.qcow2 -i /mnt/kdisk
+chroot /mnt/kdisk
+可以直接操作镜像文件
+[root@kvmsvr ~]# ls /mnt/kdisk
+bin
+home media opt
+sbin
+tmp
+boot
+lib
+misc
+proc
+selinux usr
