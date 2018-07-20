@@ -1,0 +1,104 @@
+
+云计算3大方面
+Iaas 基础设施即服务 Iaas分为共有云，私有云和混合云
+Paas 平台即服务 比如淘宝，京东
+Saas 软件即服务 比如APPSTORE
+什么是Openstack
+• OpenStack是一个由NASA(美国国家航空航天局)
+  和Rackspace合作研发并发起的项目
+• OpenStack是一套IaaS解决方案
+• OpenStack是一个开源的云计算管理平台
+• 以Apache许可证为授权
+
+
+Openstack主要组件
+1   Horizon
+– 用于管理Openstack各种服务的、基于web的管理接
+口
+– 通过图形界面实现创建用户、管理网络、启劢实例等
+操作
+2  Keystone
+– 为其他服务提供认证和授权的集中身份管理服务
+– 也提供了集中的目录服务
+– 支持多种身份认证模式,如果密码认证、令牌认证、
+以及AWS(亚马逊Web服务)登陆
+– 为用户和其他服务提供了SSO认证服务
+3  Neutron
+– 一种软件定义网络服务
+– 用于创建网络、子网、路由器、管理浮劢IP地址
+– 可以实现虚拟交换机、虚拟路由器
+– 可用于在项目中创建VPN
+4  Cinder
+– 为虚拟机管理存储卷的服务
+– 为运行在Nova中的实例提供永久的块存储
+– 可以通过快照迚行数据备份
+– 经常应用在实例存储环境中,如果数据库文件
+5  Nova
+– 在节点上用于管理虚拟机的服务
+– Nova是一个分布式的服务,能够不Keystone交互实现
+  认证,不Glance交互实现镜像管理
+– Nova被设计成在标准硬件上能够迚行水平扩展
+– 启劢实例时,如果有需要则下载镜像
+6 Glance
+– 扮演虚拟机镜像注册的角色
+– 允许用户为直接存储拷贝服务器镜像
+– 这些镜像可以用于新建虚拟机的模板
+7 Swift
+
+
+注意1 时间服务器不能在管理节点上，在真机上   chronyc sources -v检查是否正常
+    2 域名服务器不能在管理节点，在真机上   虚拟机curl www.baidu.com检查
+    3 卸载防火墙3个软件，selinux.卸载NetworkManager 主机IP必须手动配置，不能自动
+    4配置yum源，10731个包，12个源
+    5管理主机node1上
+    yum -y install lvm2-2.02.171-8.el7.x86_64
+    vgcreate cinder-volumes /dev/vdb
+    vgs
+    rpm --import 签名
+    管理主机和nova主机
+    yum -y install python-setuptools qemu-kvm libvirt-client libvirt-daemon libvirt-daemon-driver-qemu   依赖包
+    管理主机
+   yum install -y openstack-packstack
+   packstack --gen-answer-file answer.ini 生成应答文件
+   编辑 answer.ini
+11:  CONFIG_DEFAULT_PASSWORD=Taren1
+42:  CONFIG_SWIFT_INSTALL=n
+75:  CONFIG_NTP_SERVERS=192.168.1.254
+98:  CONFIG_COMPUTE_HOSTS=192.168.1.19
+102: CONFIG_NETWORK_HOSTS=192.168.1.19
+554: CONFIG_CINDER_VOLUMES_CREATE=n
+840: CONFIG_NEUTRON_ML2_TYPE_DRIVERS=flat,vxlan
+876: CONFIG_NEUTRON_ML2_VXLAN_GROUP=239.1.1.5
+910: CONFIG_NEUTRON_OVS_BRIDGE_MAPPINGS=physnet1:br-ex
+921: CONFIG_NEUTRON_OVS_BRIDGE_IFACES=br-ex:eth0
+936: CONFIG_NEUTRON_OVS_TUNNEL_IF=eth1
+1179:CONFIG_PROVISION_DEMO=n
+  
+
+packstack --answer-file=answer.ini  安装openstack
+
+
+
+
+
+
+验证
+ovs-vsctl show
+horizon 软件配置 bug
+    修改 /etc/httpd/conf.d/15-horizon_vhost.conf
+    添加 WSGIApplicationGroup %{GLOBAL}
+    重新载入配置 apachectl graceful
+cat /root/keystonerc_admin
+里面有openstack登陆账户密码
+打开浏览器192.168.1.131登陆即可
+
+
+
+
+
+
+
+
+
+
+
