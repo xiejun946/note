@@ -1,0 +1,16 @@
+admin 对应管理员
+services 对应7大服务组件（不能删除）
+
+
+
+source ~/keystonerc_admin  认证
+openstack project list   查看项目
+关于 /root/keystone_admin 文件的注意事项：
+  1、该文件只是一个文本，里面记录了 admin 的用户名和密码，与认证无关
+  2、不能通过修改该文件达到修改 admin 密码的目的
+  3、修改 admin 密码请使用 web 页面登录后，在web页面中修改
+     修改后，keystone_admin 中的密码通用要修改成新的密码才可以继续使用
+  4、该文件可以作为命令行的登录文件使用，使用方式 source ~/keystone_admin
+   openstack user set --password a u1 修改用户u1的密码为a
+   openstack image save --file ./rh6.img small  另存镜像到本地文件
+   日至文件 /var/log/nova/nova-compiuter.log
